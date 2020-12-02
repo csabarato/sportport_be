@@ -4,9 +4,11 @@ const client = new OAuth2Client(process.env.OAUTH2_CLIENT);
 
 const auth = async (req, res, next) => {
 
+    const token = req.header('Authorization').replace('Bearer ','')
+
     try {
         const ticket = await client.verifyIdToken({
-            idToken: req.query.token,
+            idToken: token,
             audience: process.env.GOOGLE_AUDIENCE
         })
 

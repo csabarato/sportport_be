@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const validator = require('validator')
 
 const sportTypeSchema = new mongoose.Schema({
 
@@ -8,8 +7,7 @@ const sportTypeSchema = new mongoose.Schema({
         unique: true,
         required: true
     }
-
-})
+}, {collection: 'sport-types'})
 
 const SportType = mongoose.model('SportType', sportTypeSchema);
 module.exports = SportType;

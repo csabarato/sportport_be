@@ -4,9 +4,10 @@ const mongoose = require('mongoose')
 const activitySchema = mongoose.Schema({
 
         owner : {
-            type: mongoose.Schema.Types.ObjectID,
+            type: String,
             required: true,
-            ref: 'User'
+            ref: 'User',
+            description: 'GoogleSignIn Account Id'
         },
 
         signedUpUsers: [{
@@ -31,7 +32,11 @@ const activitySchema = mongoose.Schema({
             type: Number
         },
 
-        pitch: {
+        description: {
+            type: String
+        },
+
+        ground: {
             type: mongoose.Schema.Types.ObjectID,
             ref: 'Ground'
         }
