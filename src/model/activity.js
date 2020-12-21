@@ -28,6 +28,10 @@ const activitySchema = mongoose.Schema({
             type: Number
         },
 
+        startDate : {
+            type: Number
+        },
+
         numOfPersons: {
             type: Number
         },
@@ -41,6 +45,14 @@ const activitySchema = mongoose.Schema({
             ref: 'Ground'
         }
 })
+
+activitySchema.methods.toJSON = function () {
+
+    const activityObject = this.toObject();
+    delete activityObject.__v;
+
+    return activityObject;
+}
 
 const Activity = mongoose.model('Activity', activitySchema);
 module.exports = Activity;
