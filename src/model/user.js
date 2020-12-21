@@ -3,7 +3,11 @@ const validator = require('validator')
 
 const userSchema = new mongoose.Schema({
 
-    email :{
+    _id : {
+        type: String
+    },
+
+    email: {
         type: String,
         unique: true,
         required: true,
@@ -16,6 +20,13 @@ const userSchema = new mongoose.Schema({
         }
     },
 
+    firstName: {
+        type: String
+    },
+    lastName: {
+        type: String
+    },
+
     username : {
         type: String,
         required: false,
@@ -25,8 +36,6 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectID,
         ref: 'Activity'
     }]
-
-
 })
 
 const User = mongoose.model('User', userSchema)

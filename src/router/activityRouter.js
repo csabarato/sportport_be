@@ -3,6 +3,7 @@ const router = new express.Router()
 const auth = require('../middleware/auth')
 const Activity = require('../model/activity')
 const SportType = require('../model/sportType')
+const User = require('../model/user')
 
 router.post('/activity' ,auth , async (req, res) => {
 
@@ -38,7 +39,13 @@ router.get('/activities', auth, async (req, res) => {
                 path: 'sportType',
                 model: SportType,
                 select: 'name'
-            }).exec();
+            })
+            .populate({
+                path: 'owner',
+                model: User,
+                select: 'email firstName lastName'
+            })
+            .exec();
 
         res.status(200).send(activities);
     } catch (e) {
