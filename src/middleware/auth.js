@@ -4,6 +4,10 @@ const client = new OAuth2Client(process.env.OAUTH2_CLIENT);
 
 const auth = async (req, res, next) => {
 
+    if(!req.header('Authorization')) {
+        return res.status(442).send({error: 'missing Authorization header'})
+    }
+
     const token = req.header('Authorization').replace('Bearer ','')
 
     try {
