@@ -11,7 +11,7 @@ router.patch('/sync_user_data', auth, async (req, res) => {
         saveUserData(req.body).then(user => {
             return res.status(200).send(user)
         }).catch(e => {
-            return res.status(500).send(e)
+            return res.status(500).send(e.message)
         })
     }
 
@@ -19,7 +19,7 @@ router.patch('/sync_user_data', auth, async (req, res) => {
         updateUserData(user, req.body).then(user => {
             return res.status(200).send(user)
         }).catch(e => {
-            return res.status(500).send(e)
+            return res.status(500).send(e.message)
         });
     }
 })
