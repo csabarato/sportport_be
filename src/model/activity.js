@@ -11,7 +11,7 @@ const activitySchema = mongoose.Schema({
         },
 
         signedUpUsers: [{
-            type: mongoose.Schema.Types.ObjectID,
+            type: String,
             ref: 'User'
         }],
 

@@ -53,4 +53,30 @@ router.get('/activities', auth, async (req, res) => {
     }
 });
 
+router.post('/activity/sign_up', auth, async (req, res) => {
+
+    try {
+        const activity = await Activity.findOne({_id : req.body.activity})
+
+        if (!activity)  {
+            return res.status(404).send({error: 'Activity not found with provided ID.'})
+        }
+
+        if (activity.owner === req.userPayload.sub) {
+            return res.status(405).send({error: 'Signing up to own activity not allowed.'})
+        }
+
+        if (activity.signedUpUsers.includes(req.userPayload.sub)) {
+            return res.status(202).send({msg: 'User already signed up.'})
+        }
+
+        activity.signedUpUsers.push(req.userPayload.sub)
+        await activity.save();
+        return res.status(200).send('Activity signup successful');
+
+    } catch (e) {
+        return res.status(400).send({error: e.message})
+    }
+})
+
 module.exports = router;
