@@ -57,6 +57,15 @@ router.post('/activity/sign_up', auth, async (req, res) => {
 
     try {
         const activity = await Activity.findOne({_id : req.body.activity})
+            .populate({
+                path: 'sportType',
+                model: SportType,
+                select: 'name'
+            }).populate({
+                    path: 'owner',
+                    model: User,
+                    select: 'email firstName lastName'
+            }).exec();
 
         if (!activity)  {
             return res.status(404).send({error: 'Activity not found with provided ID.'})
@@ -72,7 +81,7 @@ router.post('/activity/sign_up', auth, async (req, res) => {
 
         activity.signedUpUsers.push(req.userPayload.sub)
         await activity.save();
-        return res.status(200).send('Activity signup successful');
+        return res.status(200).send(activity);
 
     } catch (e) {
         return res.status(400).send({error: e.message})
