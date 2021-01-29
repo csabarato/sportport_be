@@ -33,8 +33,20 @@ router.post('/activity' ,auth , async (req, res) => {
 
 router.get('/activities', auth, async (req, res) => {
 
+    let filterObject = {};
+
+    switch (req.query.q) {
+        case 'my' : {
+            filterObject.owner = req.userPayload.sub;
+        }
+        break;
+        case 'signedUp' : {
+            filterObject.signedUpUsers = {$in : [req.userPayload.sub]};
+        }
+        break;
+    }
     try{
-        const activities = await Activity.find()
+        const activities = await Activity.find(filterObject)
             .populate({
                 path: 'sportType',
                 model: SportType,
