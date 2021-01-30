@@ -36,6 +36,10 @@ const activitySchema = mongoose.Schema({
             type: Number
         },
 
+        remainingPlaces: {
+            type : Number,
+        },
+
         description: {
             type: String
         },
@@ -53,6 +57,20 @@ activitySchema.methods.toJSON = function () {
 
     return activityObject;
 }
+
+activitySchema.pre('save', async function (next) {
+    let activity = this;
+
+    if(!activity.remainingPlaces) {
+        activity.remainingPlaces = activity.numOfPersons;
+    }
+
+    if (activity.isModified('signedUpUsers')) {
+        activity.remainingPlaces = activity.numOfPersons - activity.signedUpUsers.length;
+    }
+
+    next()
+});
 
 const Activity = mongoose.model('Activity', activitySchema);
 module.exports = Activity;
