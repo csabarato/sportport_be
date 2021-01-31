@@ -33,17 +33,9 @@ router.post('/activity' ,auth , async (req, res) => {
 
 router.get('/activities', auth, async (req, res) => {
 
-    let filterObject = {};
-
-    switch (req.query.q) {
-        case 'my' : {
-            filterObject.owner = req.userPayload.sub;
-        }
-        break;
-        case 'signedUp' : {
-            filterObject.signedUpUsers = {$in : [req.userPayload.sub]};
-        }
-        break;
+    let filterObject = {}
+    if (req.query.q) {
+        filterObject = addQueryFilters(req.query.q, req.userPayload.sub);
     }
     try{
         const activities = await Activity.find(filterObject)
@@ -99,5 +91,26 @@ router.post('/activity/sign_up', auth, async (req, res) => {
         return res.status(400).send({error: e.message})
     }
 })
+
+const addQueryFilters = function (queryParam, userId) {
+    let filterObject = {}
+    switch (queryParam) {
+        case 'my' : {
+            filterObject.owner = userId;
+        }
+            break;
+        case 'signedUp' : {
+            filterObject.signedUpUsers = {$in : [userId]};
+        }
+            break;
+        case  'open' : {
+            filterObject.$and = [ { remainingPlaces : {$gt : 0} },
+                { owner : {$ne : userId}},
+                { signedUpUsers: {$nin : [userId] }}
+            ]
+        }
+    }
+    return filterObject;
+}
 
 module.exports = router;
