@@ -5,7 +5,7 @@ const User = require('../model/user')
 
 router.patch('/sync_user_data', auth, async (req, res) => {
 
-    let user = await User.findOne({_id : req.body._id})
+    let user = await User.findOne({_id : req.userPayload.sub})
 
     if (!user) {
         saveUserData(req.body).then(user => {
