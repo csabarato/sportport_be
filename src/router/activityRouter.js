@@ -33,9 +33,11 @@ router.post('/activity' ,auth , async (req, res) => {
 
 router.get('/activities', auth, async (req, res) => {
 
-    let filterObject = {}
+    let filterObject;
     if (req.query.q) {
         filterObject = addQueryFilters(req.query.q, req.userPayload.sub);
+    } else {
+        filterObject = addFilterAllQuery(req.userPayload.sub)
     }
     try{
         const activities = await Activity.find(filterObject)
@@ -83,6 +85,10 @@ router.post('/activity/sign_up', auth, async (req, res) => {
             return res.status(202).send({msg: 'User already signed up.'})
         }
 
+        if (activity.remainingPlaces === 0) {
+            return res.status(405).send({msg: 'There is no free places at this activity'})
+        }
+
         activity.signedUpUsers.push(req.userPayload.sub)
         await activity.save();
         return res.status(200).send(activity);
@@ -110,6 +116,21 @@ const addQueryFilters = function (queryParam, userId) {
             ]
         }
     }
+    return filterObject;
+}
+
+const  addFilterAllQuery = function ( userId ) {
+    let filterObject = {}
+    filterObject.$or = [{
+        $and: [{remainingPlaces: {$gt: 0}},
+            {owner: {$ne: userId}},
+            {signedUpUsers: {$nin: [userId]}}
+        ]
+    }
+        , {owner: userId},
+        {signedUpUsers: {$in: [userId]}}
+    ]
+
     return filterObject;
 }
 
