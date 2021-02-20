@@ -51,6 +51,11 @@ router.get('/activities', auth, async (req, res) => {
                 model: User,
                 select: 'email firstName lastName'
             })
+            .populate({
+                path: 'signedUpUsers',
+                model: User,
+                select: 'email firstName lastName'
+            })
             .exec();
 
         res.status(200).send(activities);
@@ -71,18 +76,26 @@ router.post('/activity/sign_up', auth, async (req, res) => {
                     path: 'owner',
                     model: User,
                     select: 'email firstName lastName'
-            }).exec();
+            })
+            .populate({
+                path: 'signedUpUsers',
+                model: User,
+                select: 'email firstName lastName'
+            })
+            .exec();
 
         if (!activity)  {
             return res.status(404).send({error: 'Activity not found with provided ID.'})
         }
 
-        if (activity.owner === req.userPayload.sub) {
+        if (activity.owner._id === req.userPayload.sub) {
             return res.status(405).send({error: 'Signing up to own activity not allowed.'})
         }
 
-        if (activity.signedUpUsers.includes(req.userPayload.sub)) {
-            return res.status(202).send({msg: 'User already signed up.'})
+        const isUserSignedUp = activity.signedUpUsers.find(user => user._id === req.userPayload.sub);
+
+        if (isUserSignedUp) {
+            return  res.status(202).send({msg: 'User already signed up.'})
         }
 
         if (activity.remainingPlaces === 0) {
@@ -91,6 +104,13 @@ router.post('/activity/sign_up', auth, async (req, res) => {
 
         activity.signedUpUsers.push(req.userPayload.sub)
         await activity.save();
+
+        await activity.populate({
+            path: 'signedUpUsers',
+            model: User,
+            select: 'email firstName lastName'
+        }).execPopulate()
+
         return res.status(200).send(activity);
 
     } catch (e) {
