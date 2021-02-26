@@ -95,7 +95,7 @@ router.post('/activity/sign_up', auth, async (req, res) => {
         const isUserSignedUp = activity.signedUpUsers.find(user => user._id === req.userPayload.sub);
 
         if (isUserSignedUp) {
-            return  res.status(202).send({msg: 'User already signed up.'})
+            return  res.status(202).send({msg: 'User already signed up to this activity.'})
         }
 
         if (activity.remainingPlaces === 0) {
@@ -111,6 +111,51 @@ router.post('/activity/sign_up', auth, async (req, res) => {
             select: 'email firstName lastName'
         }).execPopulate()
 
+        return res.status(200).send(activity);
+
+    } catch (e) {
+        return res.status(400).send({error: e.message})
+    }
+})
+
+router.post('/activity/remove_signup', auth, async (req, res) => {
+
+    try {
+        const activity = await Activity.findOne({_id: req.body.activity})
+            .populate({
+                path: 'sportType',
+                model: SportType,
+                select: 'name'
+            }).populate({
+                path: 'owner',
+                model: User,
+                select: 'email firstName lastName'
+            })
+            .populate({
+                path: 'signedUpUsers',
+                model: User,
+                select: 'email firstName lastName'
+            })
+            .exec();
+
+        if (!activity)  {
+            return res.status(404).send({error: 'Activity not found with provided ID.'})
+        }
+
+        if (activity.owner._id === req.userPayload.sub) {
+            return res.status(405).send({error: 'Delete signup from own activity not allowed.'})
+        }
+
+        const isUserSignedUp = activity.signedUpUsers.find(user => user._id === req.userPayload.sub);
+
+        if (!isUserSignedUp) {
+            return  res.status(202).send({msg: 'User is not signed up to this activity.'})
+        }
+
+        const userIndex = activity.signedUpUsers.map(user => user._id).indexOf(req.userPayload.sub);
+        activity.signedUpUsers.splice(userIndex, 1)
+
+        await activity.save();
         return res.status(200).send(activity);
 
     } catch (e) {
