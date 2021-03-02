@@ -4,6 +4,7 @@ const auth = require('../middleware/auth')
 const Activity = require('../model/activity')
 const SportType = require('../model/sportType')
 const User = require('../model/user')
+const queryBuilder = require('../utils/queryBuilder')
 
 router.post('/activity' ,auth , async (req, res) => {
 
@@ -39,6 +40,12 @@ router.get('/activities', auth, async (req, res) => {
     } else {
         filterObject = addFilterAllQuery(req.userPayload.sub)
     }
+
+    if (req.query.sportType) {
+        const sportTypeId = await SportType.findOne({name : req.query.sportType})
+        filterObject = queryBuilder.appendAndQuery(filterObject, { sportType : sportTypeId})
+    }
+
     try{
         const activities = await Activity.find(filterObject)
             .populate({
@@ -167,18 +174,19 @@ const addQueryFilters = function (queryParam, userId) {
     let filterObject = {}
     switch (queryParam) {
         case 'my' : {
-            filterObject.owner = userId;
+            queryBuilder.addEqOperator(filterObject, 'owner', userId)
         }
             break;
         case 'signedUp' : {
-            filterObject.signedUpUsers = {$in : [userId]};
+            queryBuilder.addEqOperator(filterObject, 'signedUpUsers',{$in : [userId]})
         }
             break;
         case  'open' : {
-            filterObject.$and = [ { remainingPlaces : {$gt : 0} },
-                { owner : {$ne : userId}},
-                { signedUpUsers: {$nin : [userId] }}
-            ]
+
+            queryBuilder.addAndQuery(filterObject,
+                 { remainingPlaces : {$gt : 0} },
+                    { owner : {$ne : userId}},
+                    { signedUpUsers: {$nin : [userId] }} )
         }
     }
     return filterObject;
