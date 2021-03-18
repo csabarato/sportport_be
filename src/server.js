@@ -7,6 +7,7 @@ require('./db/mongooseConfig')
 
 const userRouter = require('./router/userRouter')
 const activityRouter = require('./router/activityRouter')
+const groundRouter = require('./router/groundRouter')
 
 const app = express()
 
@@ -14,6 +15,7 @@ const app = express()
 app.use(bodyParser.json())
 app.use(userRouter)
 app.use(activityRouter)
+app.use(groundRouter)
 
 const port = process.env.PORT
 

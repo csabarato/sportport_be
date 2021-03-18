@@ -2,13 +2,18 @@ const mongoose = require('mongoose')
 
 const groundSchema = new mongoose.Schema({
 
-    locationLatitude : {
-        type: Number,
+    reporter : {
+        type: String,
+        required: true,
+        ref: 'User',
     },
-
-    sportTypes: {
+    sportTypes: [{
         type: mongoose.Schema.Types.ObjectID,
         ref: 'SportType'
+    }],
+
+    locationLatitude : {
+        type: Number,
     },
 
     locationLongitude : {
@@ -19,11 +24,14 @@ const groundSchema = new mongoose.Schema({
         type: String
     },
 
-    isPaid : {
+    costFree : {
         type: Boolean
     },
     costPerHour: {
       type: Number
+    },
+    description : {
+        type: String
     }
 })
 
